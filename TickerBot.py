@@ -3,6 +3,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
+# TickerBot uses marketwatch to get all ticker data
 url_base = 'https://www.marketwatch.com/legacy/story/renderquotepeeks?tickers='
 # discord token kept in separate file for security purposes
 token = open('Tokens.txt').read().rstrip()
@@ -25,15 +26,27 @@ async def on_message(message):
             prices = re.findall('[^>]+(?=</span>)', str(soup.findAll('span', attrs=['class', 'bgLast'])))
             percent_changes = re.findall('[^>]+(?=</span>)', str(soup.findAll('span', attrs=['class', 'bgPercentChange'])))
 
+            embed_names, embed_prices, embed_changes = '', '', ''
             for i in range(len(names)):
-                output = names[i] + ' $' + prices[i] + ', ' + percent_changes[i]
                 # replaces &amp; with only &
-                if 'amp;' in output:
-                    output = output.replace('amp;', '')
-                await message.channel.send(output)
+                if 'amp;' in names[i]:
+                    names[i] = names[i].replace('amp;', '')
+                embed_names = embed_names + '```diff\n' + names[i] + '\n```\n'
+                embed_prices = embed_prices + '```diff\n$' + prices[i] + '\n```\n'
+                # adds space to +/- to percentage value, needed for coloring in diff version of highlights.js
+                if '+' in percent_changes[i]:
+                    embed_changes = embed_changes + '```diff\n' + percent_changes[i].replace('+', '+ ') + '\n```\n'
+                else:
+                    embed_changes = embed_changes + '```diff\n' + percent_changes[i].replace('-', '- ') + '\n```\n'
 
             if len(tickers) != len(names):
                 await message.channel.send('one or more tickers was invalid')
+
+            # creates discord embed which contains
+            embed = discord.Embed()
+            embed = embed.add_field(name='Company', value=embed_names.rstrip(), inline=True).add_field(name='Price', value=embed_prices.rstrip(), inline=True).add_field(name='Percent Change', value=embed_changes.rstrip(), inline=True)
+            await message.channel.send(embed=embed)
+
 
 # consider re-adding check to see what ticker was incorrect?
 
