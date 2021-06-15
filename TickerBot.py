@@ -14,11 +14,11 @@ client = discord.Client()
 async def on_message(message):
     if not message.author.bot:
         # gets ticker symbols from user messages
-        tickers = re.findall('(\$[a-zA-Z]+)', message.content)
+        tickers = re.findall(r'((?<=\$)(?![a-zA-Z]+(?:\d|\.[^a-zA-Z]))[a-zA-Z]+\.?[a-zA-Z]+)', message.content)
         if tickers:
             # creates urls from a given ticker and sends it to server
             # all tickers sent at once via comma separated list at end of URL
-            url = url_base + ','.join([ticker.replace('$', '') for ticker in tickers])
+            url = url_base + ','.join([ticker for ticker in tickers])
             soup = BeautifulSoup(requests.get(url).text, 'lxml')
 
             # gets company name, current price, and percent change from webpage
@@ -31,6 +31,14 @@ async def on_message(message):
                 # replaces &amp; with only &
                 if 'amp;' in names[i]:
                     names[i] = names[i].replace('amp;', '')
+                # truncates names early to prevent multiline overflow
+                if len(names[i]) > 32:
+                    print(names[i][30])
+                    if names[i][30] == '.':
+                        names[i] = names[i][0:31].rstrip() + '..'
+                    else:
+                        names[i] = names[i][0:31].rstrip() + '...'
+                # diff is added to all fields inorder to create boxes around each element
                 embed_names = embed_names + '```diff\n' + names[i] + '\n```\n'
                 embed_prices = embed_prices + '```diff\n$' + prices[i] + '\n```\n'
                 # adds space to +/- to percentage value, needed for coloring in diff version of highlights.js
