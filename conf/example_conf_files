@@ -1,5 +1,4 @@
 ###  db.conf  ###
-
 {
     "nasdaq_database": {
         "host": "<ip>",
@@ -14,6 +13,15 @@
 ###  discord.conf  ###
 {
     "tickerbot": {
+        "token": "<token>"
+    }
+}
+
+
+
+###  tiingo.conf  ###
+{
+    "tiingo": {
         "token": "<token>"
     }
 }
