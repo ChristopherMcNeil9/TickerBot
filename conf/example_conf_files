@@ -1,0 +1,19 @@
+###  db.conf  ###
+
+{
+    "nasdaq_database": {
+        "host": "<ip>",
+        "port": "5432",
+        "db_name": "<db_name>",
+        "user": "<user>",
+        "password": "<password>"
+    }
+}
+
+
+###  discord.conf  ###
+{
+    "tickerbot": {
+        "token": "<token>"
+    }
+}
